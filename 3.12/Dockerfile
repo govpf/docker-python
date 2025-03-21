@@ -19,8 +19,8 @@ RUN set -eux; \
 	rm -rf /var/lib/apt/lists/*
 
 ENV GPG_KEY 7169605F62C751356D054A26A821E680E5FA6305
-ENV PYTHON_VERSION 3.12.7
-ENV PYTHON_SHA256 24887b92e2afd4a2ac602419ad4b596372f67ac9b077190f459aba390faf5550
+ENV PYTHON_VERSION 3.12.9
+ENV PYTHON_SHA256 7220835d9f90b37c006e9842a8dff4580aaca4318674f947302b8d28f3f81112
 
 RUN set -eux; \
 	\
@@ -75,7 +75,24 @@ RUN set -eux; \
 	nproc="$(nproc)"; \
 	EXTRA_CFLAGS="$(dpkg-buildflags --get CFLAGS)"; \
 	LDFLAGS="$(dpkg-buildflags --get LDFLAGS)"; \
-	LDFLAGS="${LDFLAGS:--Wl},--strip-all"; \
+	arch="$(dpkg --print-architecture)"; arch="${arch##*-}"; \
+	# https://docs.python.org/3.12/howto/perf_profiling.html
+	# https://github.com/docker-library/python/pull/1000#issuecomment-2597021615
+			case "$arch" in \
+				amd64|arm64) \
+					# only add "-mno-omit-leaf" on arches that support it
+					# https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/x86-Options.html#index-momit-leaf-frame-pointer-2
+					# https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/AArch64-Options.html#index-momit-leaf-frame-pointer
+					EXTRA_CFLAGS="${EXTRA_CFLAGS:-} -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer"; \
+					;; \
+				i386) \
+					# don't enable frame-pointers on 32bit x86 due to performance drop.
+					;; \
+				*) \
+					# other arches don't support "-mno-omit-leaf"
+					EXTRA_CFLAGS="${EXTRA_CFLAGS:-} -fno-omit-frame-pointer"; \
+					;; \
+			esac; \
 	make -j "$nproc" \
 		"EXTRA_CFLAGS=${EXTRA_CFLAGS:-}" \
 		"LDFLAGS=${LDFLAGS:-}" \
@@ -89,6 +106,13 @@ RUN set -eux; \
 		python \
 	; \
 	make install; \
+	\
+	# enable GDB to load debugging data: https://github.com/docker-library/python/pull/701
+	bin="$(readlink -ve /usr/local/bin/python3)"; \
+	dir="$(dirname "$bin")"; \
+	mkdir -p "/usr/share/gdb/auto-load/$dir"; \
+	cp -vL Tools/gdb/libpython.py "/usr/share/gdb/auto-load/$bin-gdb.py"; \
+	\
 	\
 	cd /; \
 	rm -rf /usr/src/python; \
