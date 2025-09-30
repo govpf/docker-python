@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        versions: [3.9,3.12]
+        versions: [3.9,3.12,3.13.3-slim]
     env:
       repo: "govpf/python"
     steps:
