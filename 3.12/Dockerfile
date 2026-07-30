@@ -1,12 +1,12 @@
 FROM govpf/debian:bookworm
 
 # ensure local python is preferred over distribution python
-ENV PATH /usr/local/bin:$PATH
+ENV PATH=/usr/local/bin:$PATH
 
 # cannot remove LANG even though https://bugs.python.org/issue19846 is fixed
 # last attempted removal of LANG broke many users:
 # https://github.com/docker-library/python/pull/570
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 
 # runtime dependencies
 RUN set -eux; \
@@ -18,9 +18,9 @@ RUN set -eux; \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
-ENV GPG_KEY 7169605F62C751356D054A26A821E680E5FA6305
-ENV PYTHON_VERSION 3.12.9
-ENV PYTHON_SHA256 7220835d9f90b37c006e9842a8dff4580aaca4318674f947302b8d28f3f81112
+ENV GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305
+ENV PYTHON_VERSION=3.12.9
+ENV PYTHON_SHA256=7220835d9f90b37c006e9842a8dff4580aaca4318674f947302b8d28f3f81112
 
 RUN set -eux; \
 	\
