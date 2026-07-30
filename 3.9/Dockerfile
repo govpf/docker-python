@@ -1,4 +1,4 @@
-FROM govpf/alpine:3
+FROM govpf/alpine:3.24
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
