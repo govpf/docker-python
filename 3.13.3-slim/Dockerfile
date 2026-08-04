@@ -1,6 +1,9 @@
 # Using bookworm-slim for a smaller base image.
 FROM govpf/debian:bookworm-slim
 
+LABEL govpf.category="runtime"
+LABEL govpf.fromimage="govpf/debian:bookworm-slim"
+
 # Ensure local python is preferred over distribution python.
 ENV PATH="/usr/local/bin:$PATH"
 

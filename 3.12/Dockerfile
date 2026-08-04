@@ -1,5 +1,7 @@
 FROM govpf/debian:bookworm
 
+LABEL govpf.category="runtime"
+LABEL govpf.fromimage="govpf/debian:bookworm"
 # ensure local python is preferred over distribution python
 ENV PATH=/usr/local/bin:$PATH
 
